@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
         where: { deletedAt: null },
         orderBy: { amount: 'desc' },
         take: 1,
-        select: { id: true, amount: true },
+        select: { amount: true },
       },
       _count: { select: { bids: { where: { deletedAt: null } } } },
     },
@@ -33,7 +33,6 @@ export async function GET(req: NextRequest) {
     status: item.status,
     coverUrl: item.images[0]?.url ?? null,
     topBid: item.bids[0]?.amount ?? null,
-    topBidId: item.bids[0]?.id ?? null,
     bidCount: item._count.bids,
   }))
 

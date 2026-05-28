@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db'
 import { bidCreateSchema, bidDeleteSchema } from '@/lib/schemas'
 import { hashBidPassword, verifyBidPassword } from '@/lib/admin-auth'
 
-export type BidFormState = { error?: string; ok?: boolean; bidId?: string } | undefined
+export type BidFormState = { error?: string; ok?: boolean } | undefined
 
 export async function createBidAction(itemId: string, _state: BidFormState, formData: FormData): Promise<BidFormState> {
   const amountRaw = formData.get('amount')
@@ -23,7 +23,7 @@ export async function createBidAction(itemId: string, _state: BidFormState, form
   if (item.status !== 'OPEN') return { error: '종료된 경매입니다' }
 
   const passwordHash = await hashBidPassword(parsed.data.password)
-  const created = await prisma.bid.create({
+  await prisma.bid.create({
     data: {
       itemId,
       bidderName: parsed.data.bidderName,
@@ -31,12 +31,11 @@ export async function createBidAction(itemId: string, _state: BidFormState, form
       amount: parsed.data.amount,
       comment: parsed.data.comment || null,
     },
-    select: { id: true },
   })
 
   revalidatePath(`/items/${itemId}`)
   revalidatePath('/')
-  return { ok: true, bidId: created.id }
+  return { ok: true }
 }
 
 export async function deleteBidAction(bidId: string, _state: BidFormState, formData: FormData): Promise<BidFormState> {

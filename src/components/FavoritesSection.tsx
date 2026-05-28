@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { getFavorites, FAVORITES_EVENT } from '@/lib/favorites'
 import { formatPriceOrFree } from '@/lib/format'
 import FavoriteStar from '@/components/FavoriteStar'
-import MyTopBidBadge from '@/components/MyTopBidBadge'
 
 type Item = {
   id: string
@@ -12,7 +11,6 @@ type Item = {
   status: 'OPEN' | 'CLOSED'
   coverUrl: string | null
   topBid: number | null
-  topBidId: string | null
   bidCount: number
 }
 
@@ -83,10 +81,7 @@ export default function FavoritesSection() {
                     <span className="text-stone-400">입찰 없음</span>
                   )}
                 </p>
-                <div className="flex items-center gap-1.5 mt-1">
-                  <span className="text-xs text-stone-500">입찰 {item.bidCount}건</span>
-                  <MyTopBidBadge topBidId={item.topBidId} />
-                </div>
+                <p className="text-xs text-stone-500 mt-1">입찰 {item.bidCount}건</p>
               </div>
             </Link>
           </li>

@@ -24,6 +24,12 @@ export default async function AdminDashboardPage() {
         <h1 className="text-2xl font-bold">관리자 대시보드</h1>
         <div className="flex gap-2">
           <Link
+            href="/admin/announcements"
+            className="px-3 py-2 text-sm border rounded hover:bg-zinc-50"
+          >
+            공지 관리
+          </Link>
+          <Link
             href="/admin/bids"
             className="px-3 py-2 text-sm border rounded hover:bg-zinc-50"
           >

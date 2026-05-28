@@ -1,7 +1,6 @@
 'use client'
 import { useActionState, useEffect, useRef } from 'react'
 import { createBidAction, type BidFormState } from '@/app/actions/bids'
-import { addMyBid } from '@/lib/mybids'
 
 export default function BidForm({ itemId }: { itemId: string }) {
   const action = createBidAction.bind(null, itemId)
@@ -9,10 +8,7 @@ export default function BidForm({ itemId }: { itemId: string }) {
   const formRef = useRef<HTMLFormElement>(null)
 
   useEffect(() => {
-    if (state?.ok) {
-      formRef.current?.reset()
-      if (state.bidId) addMyBid(state.bidId)
-    }
+    if (state?.ok) formRef.current?.reset()
   }, [state])
 
   return (

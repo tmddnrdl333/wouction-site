@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import './globals.css'
+import AnnouncementBar from '@/components/AnnouncementBar'
 
 export const metadata: Metadata = {
   title: '욱션 - 당신의 물건에게 투표하세요',
@@ -9,6 +10,9 @@ export const metadata: Metadata = {
 
 // Supabase가 서울(ap-northeast-2)에 있으므로 서버 함수도 서울로 co-locate (DB 왕복 지연 최소화)
 export const preferredRegion = 'icn1'
+
+// 공지 마퀴(AnnouncementBar)가 layout에서 DB를 읽으므로 항상 요청 시점 렌더 (정적 prerender 금지)
+export const dynamic = 'force-dynamic'
 
 export default function RootLayout({
   children,
@@ -34,6 +38,8 @@ export default function RootLayout({
             </nav>
           </div>
         </header>
+
+        <AnnouncementBar />
 
         <main className="flex-1 mx-auto w-full max-w-5xl px-4 py-8">{children}</main>
 
