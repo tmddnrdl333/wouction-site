@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   description: '사내 약식 경매 사이트',
 }
 
+// Supabase가 서울(ap-northeast-2)에 있으므로 서버 함수도 서울로 co-locate (DB 왕복 지연 최소화)
+export const preferredRegion = 'icn1'
+
 export default function RootLayout({
   children,
 }: Readonly<{
