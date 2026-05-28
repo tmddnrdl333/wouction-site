@@ -40,7 +40,7 @@ export default function CloseItemForm({ itemId, bids }: { itemId: string; bids: 
               />
               <div className="flex-1">
                 <span className="font-medium">{bid.bidderName}</span>{' '}
-                <span className="text-zinc-700">{bid.amount.toLocaleString('ko-KR')}원</span>
+                <span className="text-zinc-700">{bid.amount > 0 ? bid.amount.toLocaleString('ko-KR') + '원' : '무료'}</span>
               </div>
             </label>
           </li>

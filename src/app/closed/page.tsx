@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/db'
-import { formatWon, formatDateTime } from '@/lib/format'
+import { formatPriceOrFree, formatDateTime } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
 
@@ -44,7 +44,7 @@ export default async function ClosedPage() {
                   {winner ? (
                     <p className="text-sm mt-1">
                       낙찰자: <span className="font-medium">{winner.bidderName}</span>{' '}
-                      <span className="text-zinc-600">({formatWon(winner.amount)})</span>
+                      <span className="text-zinc-600">({formatPriceOrFree(winner.amount)})</span>
                     </p>
                   ) : (
                     <p className="text-sm text-zinc-500 mt-1">낙찰 정보 없음</p>

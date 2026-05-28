@@ -24,6 +24,7 @@ export default async function EditItemPage(props: PageProps<'/admin/items/[id]/e
         itemId={item.id}
         initialTitle={item.title}
         initialDescription={item.description}
+        initialSuggestedPrice={item.suggestedPrice}
         images={item.images.map((i) => ({ id: i.id, url: i.url }))}
       />
     </div>

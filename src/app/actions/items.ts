@@ -10,6 +10,12 @@ import { BUCKET, publicUrl, supabaseAdmin } from '@/lib/supabase'
 const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp'])
 const MAX_BYTES = 5 * 1024 * 1024
 
+function parseSuggestedPrice(formData: FormData): number | null {
+  const raw = formData.get('suggestedPrice')
+  const str = typeof raw === 'string' ? raw.replace(/,/g, '').trim() : ''
+  return str === '' ? null : Number(str)
+}
+
 async function uploadImages(itemId: string, files: File[]): Promise<{ url: string; sortOrder: number }[]> {
   const supa = supabaseAdmin()
   const results: { url: string; sortOrder: number }[] = []
@@ -38,6 +44,7 @@ export async function createItemAction(_state: ItemFormState, formData: FormData
   const parsed = itemCreateSchema.safeParse({
     title: formData.get('title'),
     description: formData.get('description'),
+    suggestedPrice: parseSuggestedPrice(formData),
   })
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message || '입력값을 확인해주세요' }
@@ -60,6 +67,7 @@ export async function createItemAction(_state: ItemFormState, formData: FormData
       id: itemId,
       title: parsed.data.title,
       description: parsed.data.description,
+      suggestedPrice: parsed.data.suggestedPrice,
       images: { create: images },
     },
   })
@@ -74,6 +82,7 @@ export async function updateItemAction(itemId: string, _state: ItemFormState, fo
   const parsed = itemCreateSchema.safeParse({
     title: formData.get('title'),
     description: formData.get('description'),
+    suggestedPrice: parseSuggestedPrice(formData),
   })
   if (!parsed.success) return { error: parsed.error.issues[0]?.message || '입력값을 확인해주세요' }
 
@@ -88,7 +97,11 @@ export async function updateItemAction(itemId: string, _state: ItemFormState, fo
   await prisma.$transaction([
     prisma.item.update({
       where: { id: itemId },
-      data: { title: parsed.data.title, description: parsed.data.description },
+      data: {
+        title: parsed.data.title,
+        description: parsed.data.description,
+        suggestedPrice: parsed.data.suggestedPrice,
+      },
     }),
     ...(newImages.length > 0
       ? [

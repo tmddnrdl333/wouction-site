@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/db'
-import { formatWon } from '@/lib/format'
+import { formatPriceOrFree } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
 
@@ -48,7 +48,7 @@ export default async function HomePage() {
                     <h2 className="font-semibold truncate">{item.title}</h2>
                     <p className="text-sm text-zinc-600 mt-1">
                       {topBid != null ? (
-                        <>현재 최고가 <span className="font-bold text-zinc-900">{formatWon(topBid)}</span></>
+                        <>현재 최고가 <span className="font-bold text-zinc-900">{formatPriceOrFree(topBid)}</span></>
                       ) : (
                         <span className="text-zinc-400">입찰 없음</span>
                       )}

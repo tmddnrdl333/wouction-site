@@ -14,13 +14,14 @@ enum ItemStatus {
 }
 
 model Item {
-  id          String     @id @default(uuid()) @db.Uuid
-  title       String     @db.VarChar(200)
-  description String
-  status      ItemStatus @default(OPEN)
-  winnerBidId String?    @db.Uuid
-  createdAt   DateTime   @default(now()) @db.Timestamptz(6)
-  closedAt    DateTime?  @db.Timestamptz(6)
+  id             String     @id @default(uuid()) @db.Uuid
+  title          String     @db.VarChar(200)
+  description    String
+  suggestedPrice Int?
+  status         ItemStatus @default(OPEN)
+  winnerBidId    String?    @db.Uuid
+  createdAt      DateTime   @default(now()) @db.Timestamptz(6)
+  closedAt       DateTime?  @db.Timestamptz(6)
 
   images Image[]
   bids   Bid[]

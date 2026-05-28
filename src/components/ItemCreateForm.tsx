@@ -16,6 +16,18 @@ export default function ItemCreateForm() {
         <textarea name="description" required rows={6} className="w-full border rounded px-3 py-2" />
       </div>
       <div>
+        <label className="block text-sm font-medium mb-1">제안가격 (원)</label>
+        <input
+          name="suggestedPrice"
+          type="number"
+          min={0}
+          step={1}
+          className="w-full border rounded px-3 py-2"
+          placeholder="1000"
+        />
+        <p className="text-xs text-zinc-500 mt-1">※ 비워두면 무료로 표시됩니다.</p>
+      </div>
+      <div>
         <label className="block text-sm font-medium mb-1">이미지 * (여러 장 가능)</label>
         <input
           name="images"

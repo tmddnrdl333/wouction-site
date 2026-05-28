@@ -43,16 +43,16 @@ export default function BidForm({ itemId }: { itemId: string }) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">입찰가 (원) *</label>
+        <label className="block text-sm font-medium mb-1">입찰가 (원)</label>
         <input
           name="amount"
           type="number"
-          min={1}
+          min={0}
           step={1}
-          required
           className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-zinc-400"
-          placeholder="50000"
+          placeholder="1000"
         />
+        <p className="text-xs text-zinc-500 mt-1">※ 비워두면 무료로 등록됩니다.</p>
       </div>
 
       <div>

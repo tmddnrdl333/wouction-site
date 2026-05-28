@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { prisma } from '@/lib/db'
-import { formatWon, formatDateTime } from '@/lib/format'
+import { formatPriceOrFree, formatDateTime } from '@/lib/format'
 import BidForm from '@/components/BidForm'
 import DeleteBidDialog from '@/components/DeleteBidDialog'
 import ImageGallery from '@/components/ImageGallery'
@@ -50,6 +50,9 @@ export default async function ItemDetailPage(props: PageProps<'/items/[id]'>) {
         </div>
 
         <h1 className="text-2xl font-bold">{item.title}</h1>
+        <p className="mt-2 text-sm text-zinc-600">
+          제안가격 <span className="font-semibold text-zinc-900">{formatPriceOrFree(item.suggestedPrice)}</span>
+        </p>
         <div className="mt-4 whitespace-pre-wrap text-zinc-700">{item.description}</div>
 
         {item.status === 'OPEN' && (
@@ -66,7 +69,7 @@ export default async function ItemDetailPage(props: PageProps<'/items/[id]'>) {
               return winner ? (
                 <p>
                   <span className="font-medium">{winner.bidderName}</span>{' '}
-                  <span className="text-zinc-700">— {formatWon(winner.amount)}</span>
+                  <span className="text-zinc-700">— {formatPriceOrFree(winner.amount)}</span>
                 </p>
               ) : (
                 <p className="text-zinc-500">낙찰자 정보 없음</p>
@@ -94,7 +97,7 @@ export default async function ItemDetailPage(props: PageProps<'/items/[id]'>) {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{bid.bidderName}</span>
-                      <span className="font-bold">{formatWon(bid.amount)}</span>
+                      <span className="font-bold">{formatPriceOrFree(bid.amount)}</span>
                       {isTop && <span className="text-xs bg-yellow-200 text-yellow-900 px-1.5 rounded">최고가</span>}
                     </div>
                     {bid.comment && <p className="text-sm text-zinc-600 mt-1 whitespace-pre-wrap">{bid.comment}</p>}

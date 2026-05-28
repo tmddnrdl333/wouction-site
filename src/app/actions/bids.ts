@@ -8,10 +8,12 @@ export type BidFormState = { error?: string; ok?: boolean } | undefined
 
 export async function createBidAction(itemId: string, _state: BidFormState, formData: FormData): Promise<BidFormState> {
   const amountRaw = formData.get('amount')
+  const amountStr = typeof amountRaw === 'string' ? amountRaw.replace(/,/g, '').trim() : ''
+  const amount = amountStr === '' ? 0 : Number(amountStr)
   const parsed = bidCreateSchema.safeParse({
     bidderName: formData.get('bidderName'),
     password: formData.get('password'),
-    amount: typeof amountRaw === 'string' ? Number(amountRaw.replace(/,/g, '')) : Number(amountRaw),
+    amount,
     comment: formData.get('comment') || undefined,
   })
   if (!parsed.success) return { error: parsed.error.issues[0]?.message || '입력값을 확인해주세요' }
