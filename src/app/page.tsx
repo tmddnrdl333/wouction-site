@@ -1,13 +1,35 @@
 import Link from 'next/link'
+import type { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/db'
 import { formatPriceOrFree } from '@/lib/format'
+import SearchSortBar from '@/components/SearchSortBar'
 
 export const dynamic = 'force-dynamic'
 
-export default async function HomePage() {
+function buildOrderBy(sort: string): Prisma.ItemOrderByWithRelationInput {
+  switch (sort) {
+    case 'bids':
+      return { bids: { _count: 'desc' } }
+    case 'price_low':
+      return { suggestedPrice: 'asc' }
+    case 'price_high':
+      return { suggestedPrice: 'desc' }
+    default:
+      return { createdAt: 'desc' }
+  }
+}
+
+export default async function HomePage(props: PageProps<'/'>) {
+  const sp = await props.searchParams
+  const q = typeof sp.q === 'string' ? sp.q.trim() : ''
+  const sort = typeof sp.sort === 'string' ? sp.sort : 'latest'
+
   const items = await prisma.item.findMany({
-    where: { status: 'OPEN' },
-    orderBy: { createdAt: 'desc' },
+    where: {
+      status: 'OPEN',
+      ...(q ? { title: { contains: q, mode: 'insensitive' } } : {}),
+    },
+    orderBy: buildOrderBy(sort),
     include: {
       images: { orderBy: { sortOrder: 'asc' }, take: 1 },
       bids: {
@@ -23,8 +45,11 @@ export default async function HomePage() {
   return (
     <div>
       <h1 className="text-2xl font-bold mb-4">진행 중인 경매</h1>
+      <SearchSortBar />
       {items.length === 0 ? (
-        <p className="text-zinc-500 py-12 text-center">진행 중인 경매가 없습니다.</p>
+        <p className="text-zinc-500 py-12 text-center">
+          {q ? `"${q}" 검색 결과가 없습니다.` : '진행 중인 경매가 없습니다.'}
+        </p>
       ) : (
         <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {items.map((item) => {

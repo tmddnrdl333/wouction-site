@@ -5,7 +5,7 @@ import { randomUUID } from 'crypto'
 import { prisma } from '@/lib/db'
 import { verifyAdmin } from '@/lib/dal'
 import { itemCreateSchema } from '@/lib/schemas'
-import { BUCKET, publicUrl, supabaseAdmin } from '@/lib/supabase'
+import { BUCKET, publicUrl, supabaseAdmin, storagePathFromUrl, removeStorageObjects } from '@/lib/supabase'
 
 const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp'])
 const MAX_BYTES = 5 * 1024 * 1024
@@ -123,12 +123,23 @@ export async function deleteImageAction(imageId: string) {
   const img = await prisma.image.findUnique({ where: { id: imageId } })
   if (!img) return
   await prisma.image.delete({ where: { id: imageId } })
+  const path = storagePathFromUrl(img.url)
+  if (path) await removeStorageObjects([path])
   revalidatePath('/')
   revalidatePath(`/items/${img.itemId}`)
 }
 
-export async function closeItemAction(itemId: string, winnerBidId: string) {
+export async function closeItemAction(
+  itemId: string,
+  winnerBidId: string,
+): Promise<{ error?: string } | void> {
   await verifyAdmin()
+  const winner = await prisma.bid.findFirst({
+    where: { id: winnerBidId, itemId, deletedAt: null },
+    select: { id: true },
+  })
+  if (!winner) return { error: '유효하지 않은 낙찰 입찰입니다. 새로고침 후 다시 시도해주세요.' }
+
   await prisma.item.update({
     where: { id: itemId },
     data: { status: 'CLOSED', winnerBidId, closedAt: new Date() },
@@ -142,7 +153,10 @@ export async function closeItemAction(itemId: string, winnerBidId: string) {
 
 export async function deleteItemAction(itemId: string) {
   await verifyAdmin()
+  const images = await prisma.image.findMany({ where: { itemId }, select: { url: true } })
+  const paths = images.map((i) => storagePathFromUrl(i.url)).filter((p): p is string => p !== null)
   await prisma.item.delete({ where: { id: itemId } })
+  if (paths.length) await removeStorageObjects(paths)
   revalidatePath('/')
   revalidatePath('/closed')
   revalidatePath('/admin')

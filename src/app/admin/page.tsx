@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db'
 import { verifyAdmin } from '@/lib/dal'
 import { formatDateTime } from '@/lib/format'
 import { logoutAction } from '@/app/actions/auth'
+import DeleteItemButton from '@/components/DeleteItemButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -82,6 +83,7 @@ export default async function AdminDashboardPage() {
                       종료
                     </Link>
                   )}
+                  <DeleteItemButton itemId={item.id} />
                 </div>
               </li>
             )

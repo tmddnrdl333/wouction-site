@@ -7,6 +7,7 @@ type Bid = { id: string; bidderName: string; amount: number; createdAt: Date }
 export default function CloseItemForm({ itemId, bids }: { itemId: string; bids: Bid[] }) {
   const [selected, setSelected] = useState<string>(bids[0]?.id || '')
   const [pending, setPending] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   if (bids.length === 0) {
     return <p className="text-zinc-500 py-6 text-center bg-white border rounded">입찰이 없어 종료할 수 없습니다.</p>
@@ -17,9 +18,15 @@ export default function CloseItemForm({ itemId, bids }: { itemId: string; bids: 
     if (!selected) return
     if (!confirm('낙찰을 확정하면 되돌릴 수 없습니다. 진행하시겠습니까?')) return
     setPending(true)
+    setError(null)
     try {
-      await closeItemAction(itemId, selected)
-    } finally {
+      const res = await closeItemAction(itemId, selected)
+      if (res?.error) {
+        setError(res.error)
+        setPending(false)
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '오류가 발생했습니다')
       setPending(false)
     }
   }
@@ -46,6 +53,7 @@ export default function CloseItemForm({ itemId, bids }: { itemId: string; bids: 
           </li>
         ))}
       </ul>
+      {error && <p className="text-sm text-red-600">{error}</p>}
       <button
         type="submit"
         disabled={pending || !selected}
