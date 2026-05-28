@@ -2,9 +2,11 @@
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 
+const DEFAULT_SORT = 'bids'
+
 const SORTS = [
-  { value: 'latest', label: '최신순' },
   { value: 'bids', label: '입찰 많은순' },
+  { value: 'latest', label: '최신순' },
   { value: 'price_low', label: '제안가 낮은순' },
   { value: 'price_high', label: '제안가 높은순' },
 ]
@@ -13,12 +15,12 @@ export default function SearchSortBar() {
   const router = useRouter()
   const params = useSearchParams()
   const [q, setQ] = useState(params.get('q') ?? '')
-  const sort = params.get('sort') ?? 'latest'
+  const sort = params.get('sort') ?? DEFAULT_SORT
 
   function push(nextQ: string, nextSort: string) {
     const p = new URLSearchParams()
     if (nextQ.trim()) p.set('q', nextQ.trim())
-    if (nextSort !== 'latest') p.set('sort', nextSort)
+    if (nextSort !== DEFAULT_SORT) p.set('sort', nextSort)
     const qs = p.toString()
     router.push(qs ? `/?${qs}` : '/')
   }

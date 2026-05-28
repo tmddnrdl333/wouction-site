@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db'
 import { formatPriceOrFree } from '@/lib/format'
 import SearchSortBar from '@/components/SearchSortBar'
 import FavoriteStar from '@/components/FavoriteStar'
+import FavoritesSection from '@/components/FavoritesSection'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,7 +24,7 @@ function buildOrderBy(sort: string): Prisma.ItemOrderByWithRelationInput {
 export default async function HomePage(props: PageProps<'/'>) {
   const sp = await props.searchParams
   const q = typeof sp.q === 'string' ? sp.q.trim() : ''
-  const sort = typeof sp.sort === 'string' ? sp.sort : 'latest'
+  const sort = typeof sp.sort === 'string' ? sp.sort : 'bids'
 
   const items = await prisma.item.findMany({
     where: {
@@ -45,6 +46,7 @@ export default async function HomePage(props: PageProps<'/'>) {
 
   return (
     <div>
+      <FavoritesSection />
       <h1 className="text-2xl font-bold mb-4">진행 중인 경매</h1>
       <SearchSortBar />
       {items.length === 0 ? (
