@@ -31,6 +31,9 @@ export default function RootLayout({
               <Link href="/closed" className="px-3 py-1.5 rounded-full hover:bg-stone-200/60 transition">
                 종료된 경매
               </Link>
+              <Link href="/favorites" className="px-3 py-1.5 rounded-full hover:bg-stone-200/60 transition">
+                ⭐ 관심
+              </Link>
             </nav>
           </div>
         </header>

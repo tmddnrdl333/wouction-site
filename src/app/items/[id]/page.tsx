@@ -5,6 +5,7 @@ import { formatPriceOrFree, formatDateTime } from '@/lib/format'
 import BidForm from '@/components/BidForm'
 import DeleteBidDialog from '@/components/DeleteBidDialog'
 import ImageGallery from '@/components/ImageGallery'
+import FavoriteStar from '@/components/FavoriteStar'
 
 export const dynamic = 'force-dynamic'
 
@@ -49,7 +50,10 @@ export default async function ItemDetailPage(props: PageProps<'/items/[id]'>) {
           <span className="text-xs text-zinc-500">{formatDateTime(item.createdAt)} 등록</span>
         </div>
 
-        <h1 className="text-2xl font-bold">{item.title}</h1>
+        <div className="flex items-start gap-2">
+          <h1 className="text-2xl font-bold flex-1">{item.title}</h1>
+          <FavoriteStar itemId={item.id} />
+        </div>
         <p className="mt-2 text-sm text-zinc-600">
           제안가격 <span className="font-semibold text-zinc-900">{formatPriceOrFree(item.suggestedPrice)}</span>
         </p>

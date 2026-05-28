@@ -3,6 +3,7 @@ import type { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/db'
 import { formatPriceOrFree } from '@/lib/format'
 import SearchSortBar from '@/components/SearchSortBar'
+import FavoriteStar from '@/components/FavoriteStar'
 
 export const dynamic = 'force-dynamic'
 
@@ -56,7 +57,8 @@ export default async function HomePage(props: PageProps<'/'>) {
             const topBid = item.bids[0]?.amount
             const cover = item.images[0]?.url
             return (
-              <li key={item.id}>
+              <li key={item.id} className="relative">
+                <FavoriteStar itemId={item.id} className="absolute top-2 left-2 z-10" />
                 <Link
                   href={`/items/${item.id}`}
                   className="block bg-white border rounded-lg overflow-hidden hover:shadow-md transition"
