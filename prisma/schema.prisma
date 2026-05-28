@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum ItemStatus {
+  OPEN
+  CLOSED
+}
+
+model Item {
+  id          String     @id @default(uuid()) @db.Uuid
+  title       String     @db.VarChar(200)
+  description String
+  status      ItemStatus @default(OPEN)
+  winnerBidId String?    @db.Uuid
+  createdAt   DateTime   @default(now()) @db.Timestamptz(6)
+  closedAt    DateTime?  @db.Timestamptz(6)
+
+  images Image[]
+  bids   Bid[]
+
+  @@index([status, createdAt(sort: Desc)])
+}
+
+model Image {
+  id        String   @id @default(uuid()) @db.Uuid
+  itemId    String   @db.Uuid
+  url       String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@index([itemId, sortOrder])
+}
+
+model Bid {
+  id           String    @id @default(uuid()) @db.Uuid
+  itemId       String    @db.Uuid
+  bidderName   String    @db.VarChar(50)
+  passwordHash String    @db.VarChar(60)
+  amount       Int
+  comment      String?
+  createdAt    DateTime  @default(now()) @db.Timestamptz(6)
+  deletedAt    DateTime? @db.Timestamptz(6)
+
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@index([itemId, createdAt(sort: Desc)])
+  @@index([itemId, amount(sort: Desc)])
+}

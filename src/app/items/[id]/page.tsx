@@ -1,0 +1,116 @@
+import { notFound } from 'next/navigation'
+import Link from 'next/link'
+import { prisma } from '@/lib/db'
+import { formatWon, formatDateTime } from '@/lib/format'
+import BidForm from '@/components/BidForm'
+import DeleteBidDialog from '@/components/DeleteBidDialog'
+import ImageGallery from '@/components/ImageGallery'
+
+export const dynamic = 'force-dynamic'
+
+export default async function ItemDetailPage(props: PageProps<'/items/[id]'>) {
+  const { id } = await props.params
+
+  const item = await prisma.item.findUnique({
+    where: { id },
+    include: {
+      images: { orderBy: { sortOrder: 'asc' } },
+      bids: { where: { deletedAt: null }, orderBy: { createdAt: 'desc' } },
+    },
+  })
+
+  if (!item) notFound()
+
+  const topBidId = item.bids.length
+    ? item.bids.reduce((a, b) => (b.amount > a.amount ? b : a)).id
+    : null
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        {item.images.length > 0 ? (
+          <ImageGallery urls={item.images.map((i) => i.url)} alt={item.title} />
+        ) : (
+          <div className="aspect-square bg-zinc-100 rounded-lg flex items-center justify-center text-zinc-400">
+            No image
+          </div>
+        )}
+      </div>
+
+      <div>
+        <div className="flex items-center gap-2 mb-2">
+          <span
+            className={`text-xs px-2 py-0.5 rounded ${
+              item.status === 'OPEN' ? 'bg-green-100 text-green-800' : 'bg-zinc-200 text-zinc-700'
+            }`}
+          >
+            {item.status === 'OPEN' ? '진행 중' : '종료'}
+          </span>
+          <span className="text-xs text-zinc-500">{formatDateTime(item.createdAt)} 등록</span>
+        </div>
+
+        <h1 className="text-2xl font-bold">{item.title}</h1>
+        <div className="mt-4 whitespace-pre-wrap text-zinc-700">{item.description}</div>
+
+        {item.status === 'OPEN' && (
+          <div className="mt-6">
+            <BidForm itemId={item.id} />
+          </div>
+        )}
+
+        {item.status === 'CLOSED' && item.winnerBidId && (
+          <div className="mt-6 bg-yellow-50 border border-yellow-300 rounded-lg p-4">
+            <h3 className="font-bold mb-1">낙찰 정보</h3>
+            {(() => {
+              const winner = item.bids.find((b) => b.id === item.winnerBidId)
+              return winner ? (
+                <p>
+                  <span className="font-medium">{winner.bidderName}</span>{' '}
+                  <span className="text-zinc-700">— {formatWon(winner.amount)}</span>
+                </p>
+              ) : (
+                <p className="text-zinc-500">낙찰자 정보 없음</p>
+              )
+            })()}
+          </div>
+        )}
+      </div>
+
+      <section className="md:col-span-2">
+        <h2 className="text-lg font-bold mb-3">입찰 목록 ({item.bids.length})</h2>
+        {item.bids.length === 0 ? (
+          <p className="text-zinc-500 py-6 text-center bg-white border rounded">아직 입찰이 없습니다.</p>
+        ) : (
+          <ul className="space-y-2">
+            {item.bids.map((bid) => {
+              const isTop = bid.id === topBidId
+              return (
+                <li
+                  key={bid.id}
+                  className={`bg-white border rounded p-3 flex items-start justify-between gap-3 ${
+                    isTop ? 'border-yellow-400 bg-yellow-50' : ''
+                  }`}
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{bid.bidderName}</span>
+                      <span className="font-bold">{formatWon(bid.amount)}</span>
+                      {isTop && <span className="text-xs bg-yellow-200 text-yellow-900 px-1.5 rounded">최고가</span>}
+                    </div>
+                    {bid.comment && <p className="text-sm text-zinc-600 mt-1 whitespace-pre-wrap">{bid.comment}</p>}
+                    <p className="text-xs text-zinc-400 mt-1">{formatDateTime(bid.createdAt)}</p>
+                  </div>
+                  {item.status === 'OPEN' && <DeleteBidDialog bidId={bid.id} />}
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      </section>
+
+      <div className="md:col-span-2">
+        <Link href="/" className="text-sm text-zinc-500 hover:underline">← 목록으로</Link>
+      </div>
+    </div>
+  )
+}
