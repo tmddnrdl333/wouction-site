@@ -3,8 +3,8 @@ import Link from 'next/link'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'wouction — 사내 약식 경매',
-  description: '사내 약식 경매 사이트',
+  title: '욱션 - 당신의 물건에게 투표하세요',
+  description: '사내 약식 경매 사이트 욱션(wouction)',
 }
 
 // Supabase가 서울(ap-northeast-2)에 있으므로 서버 함수도 서울로 co-locate (DB 왕복 지연 최소화)
