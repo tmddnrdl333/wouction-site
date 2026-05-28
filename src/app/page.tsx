@@ -5,6 +5,7 @@ import { formatPriceOrFree } from '@/lib/format'
 import SearchSortBar from '@/components/SearchSortBar'
 import FavoriteStar from '@/components/FavoriteStar'
 import FavoritesSection from '@/components/FavoritesSection'
+import MyTopBidBadge from '@/components/MyTopBidBadge'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,7 +39,7 @@ export default async function HomePage(props: PageProps<'/'>) {
         where: { deletedAt: null },
         orderBy: { amount: 'desc' },
         take: 1,
-        select: { amount: true },
+        select: { id: true, amount: true },
       },
       _count: { select: { bids: { where: { deletedAt: null } } } },
     },
@@ -57,6 +58,7 @@ export default async function HomePage(props: PageProps<'/'>) {
         <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {items.map((item) => {
             const topBid = item.bids[0]?.amount
+            const topBidId = item.bids[0]?.id ?? null
             const cover = item.images[0]?.url
             return (
               <li key={item.id} className="relative">
@@ -82,7 +84,10 @@ export default async function HomePage(props: PageProps<'/'>) {
                         <span className="text-zinc-400">입찰 없음</span>
                       )}
                     </p>
-                    <p className="text-xs text-zinc-500 mt-0.5">입찰 {item._count.bids}건</p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className="text-xs text-zinc-500">입찰 {item._count.bids}건</span>
+                      <MyTopBidBadge topBidId={topBidId} />
+                    </div>
                   </div>
                 </Link>
               </li>
