@@ -10,13 +10,12 @@ export const dynamic = 'force-dynamic'
 
 function buildOrderBy(sort: string): Prisma.ItemOrderByWithRelationInput {
   switch (sort) {
-    case 'bids':
-      return { bids: { _count: 'desc' } }
     case 'price_low':
       return { suggestedPrice: 'asc' }
     case 'price_high':
       return { suggestedPrice: 'desc' }
     default:
+      // 'bids'는 제외 입찰을 뺀 카운트로 정렬해야 하므로 일단 최신순으로 가져온 뒤 JS에서 재정렬
       return { createdAt: 'desc' }
   }
 }
@@ -40,9 +39,13 @@ export default async function HomePage(props: PageProps<'/'>) {
         take: 1,
         select: { amount: true },
       },
-      _count: { select: { bids: { where: { deletedAt: null } } } },
+      _count: { select: { bids: { where: { deletedAt: null, excludedAt: null } } } },
     },
   })
+
+  if (sort === 'bids') {
+    items.sort((a, b) => b._count.bids - a._count.bids)
+  }
 
   return (
     <div>

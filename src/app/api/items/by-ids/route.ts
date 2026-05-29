@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
         take: 1,
         select: { amount: true },
       },
-      _count: { select: { bids: { where: { deletedAt: null } } } },
+      _count: { select: { bids: { where: { deletedAt: null, excludedAt: null } } } },
     },
   })
 
