@@ -133,6 +133,7 @@ export async function closeItemAction(
   itemId: string,
   winnerBidId: string,
   winningPrice: number,
+  winningReason: string,
 ): Promise<{ error?: string } | void> {
   await verifyAdmin()
   const winner = await prisma.bid.findFirst({
@@ -145,9 +146,18 @@ export async function closeItemAction(
     return { error: '낙찰가는 0 이상의 정수여야 합니다' }
   }
 
+  const reason = winningReason.trim()
+  if (!reason) return { error: '낙찰 사유를 입력해주세요' }
+
   await prisma.item.update({
     where: { id: itemId },
-    data: { status: 'CLOSED', winnerBidId, winningPrice, closedAt: new Date() },
+    data: {
+      status: 'CLOSED',
+      winnerBidId,
+      winningPrice,
+      winningReason: reason.slice(0, 500),
+      closedAt: new Date(),
+    },
   })
   revalidatePath('/')
   revalidatePath('/closed')

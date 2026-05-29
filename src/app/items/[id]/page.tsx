@@ -79,10 +79,15 @@ export default async function ItemDetailPage(props: PageProps<'/items/[id]'>) {
             {(() => {
               const winner = item.bids.find((b) => b.id === item.winnerBidId)
               return winner ? (
-                <p>
-                  <span className="font-medium">{winner.bidderName}</span>{' '}
-                  <span className="text-zinc-700">— {formatPriceOrFree(item.winningPrice)}</span>
-                </p>
+                <>
+                  <p>
+                    <span className="font-medium">{winner.bidderName}</span>{' '}
+                    <span className="text-zinc-700">— {formatPriceOrFree(item.winningPrice)}</span>
+                  </p>
+                  {item.winningReason && (
+                    <p className="text-sm text-zinc-600 mt-1">사유: {item.winningReason}</p>
+                  )}
+                </>
               ) : (
                 <p className="text-zinc-500">낙찰자 정보 없음</p>
               )

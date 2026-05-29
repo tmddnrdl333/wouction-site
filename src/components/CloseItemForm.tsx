@@ -7,6 +7,7 @@ type Bid = { id: string; bidderName: string; amount: number; createdAt: Date }
 export default function CloseItemForm({ itemId, bids }: { itemId: string; bids: Bid[] }) {
   const [selected, setSelected] = useState<string>(bids[0]?.id || '')
   const [price, setPrice] = useState<string>(bids[0] ? String(bids[0].amount) : '0')
+  const [reason, setReason] = useState('')
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -27,11 +28,15 @@ export default function CloseItemForm({ itemId, bids }: { itemId: string; bids: 
       setError('낙찰가는 0 이상의 정수여야 합니다')
       return
     }
+    if (!reason.trim()) {
+      setError('낙찰 사유를 입력해주세요')
+      return
+    }
     if (!confirm(`낙찰가 ${winningPrice.toLocaleString('ko-KR')}원으로 확정합니다. 되돌릴 수 없습니다. 진행할까요?`)) return
     setPending(true)
     setError(null)
     try {
-      const res = await closeItemAction(itemId, selected, winningPrice)
+      const res = await closeItemAction(itemId, selected, winningPrice, reason)
       if (res?.error) {
         setError(res.error)
         setPending(false)
@@ -77,6 +82,19 @@ export default function CloseItemForm({ itemId, bids }: { itemId: string; bids: 
           className="w-full border rounded px-3 py-2"
         />
         <p className="text-xs text-stone-500 mt-1">선택한 입찰가가 기본값입니다. 직접 수정할 수 있습니다.</p>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">낙찰 사유</label>
+        <textarea
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          required
+          rows={2}
+          maxLength={500}
+          placeholder="예: 최고가 입찰 / 협의 완료"
+          className="w-full border rounded px-3 py-2"
+        />
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}

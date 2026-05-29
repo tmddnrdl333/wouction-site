@@ -15,6 +15,7 @@ export default function AwardBidControl({
 }) {
   const [open, setOpen] = useState(false)
   const [price, setPrice] = useState(String(defaultAmount))
+  const [reason, setReason] = useState('')
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -25,10 +26,14 @@ export default function AwardBidControl({
       setError('낙찰가는 0 이상의 정수여야 합니다')
       return
     }
+    if (!reason.trim()) {
+      setError('낙찰 사유를 입력해주세요')
+      return
+    }
     setPending(true)
     setError(null)
     try {
-      const res = await closeItemAction(itemId, bidId, winningPrice)
+      const res = await closeItemAction(itemId, bidId, winningPrice, reason)
       if (res?.error) {
         setError(res.error)
         setPending(false)
@@ -68,6 +73,18 @@ export default function AwardBidControl({
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   autoFocus
+                  className="w-full border rounded px-3 py-2"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">낙찰 사유</label>
+                <textarea
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  required
+                  rows={2}
+                  maxLength={500}
+                  placeholder="예: 최고가 입찰 / 협의 완료"
                   className="w-full border rounded px-3 py-2"
                 />
               </div>

@@ -21,6 +21,7 @@ model Item {
   status         ItemStatus @default(OPEN)
   winnerBidId    String?    @db.Uuid
   winningPrice   Int?
+  winningReason  String?
   createdAt      DateTime   @default(now()) @db.Timestamptz(6)
   closedAt       DateTime?  @db.Timestamptz(6)
 
