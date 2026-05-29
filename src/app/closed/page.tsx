@@ -44,7 +44,7 @@ export default async function ClosedPage() {
                   {winner ? (
                     <p className="text-sm mt-1">
                       낙찰자: <span className="font-medium">{winner.bidderName}</span>{' '}
-                      <span className="text-zinc-600">({formatPriceOrFree(winner.amount)})</span>
+                      <span className="text-zinc-600">({formatPriceOrFree(item.winningPrice)})</span>
                     </p>
                   ) : (
                     <p className="text-sm text-zinc-500 mt-1">낙찰 정보 없음</p>

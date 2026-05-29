@@ -20,6 +20,7 @@ model Item {
   suggestedPrice Int?
   status         ItemStatus @default(OPEN)
   winnerBidId    String?    @db.Uuid
+  winningPrice   Int?
   createdAt      DateTime   @default(now()) @db.Timestamptz(6)
   closedAt       DateTime?  @db.Timestamptz(6)
 
@@ -55,10 +56,12 @@ model Bid {
   itemId       String    @db.Uuid
   bidderName   String    @db.VarChar(50)
   passwordHash String    @db.VarChar(60)
-  amount       Int
-  comment      String?
-  createdAt    DateTime  @default(now()) @db.Timestamptz(6)
-  deletedAt    DateTime? @db.Timestamptz(6)
+  amount        Int
+  comment       String?
+  excludedAt    DateTime? @db.Timestamptz(6)
+  excludeReason String?
+  createdAt     DateTime  @default(now()) @db.Timestamptz(6)
+  deletedAt     DateTime? @db.Timestamptz(6)
 
   item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
 

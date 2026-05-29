@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     include: {
       images: { orderBy: { sortOrder: 'asc' }, take: 1 },
       bids: {
-        where: { deletedAt: null },
+        where: { deletedAt: null, excludedAt: null },
         orderBy: { amount: 'desc' },
         take: 1,
         select: { amount: true },

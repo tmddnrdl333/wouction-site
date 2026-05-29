@@ -1,29 +1,37 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { prisma } from '@/lib/db'
+import { optionalAdmin } from '@/lib/dal'
 import { formatPriceOrFree, formatDateTime } from '@/lib/format'
 import BidForm from '@/components/BidForm'
 import DeleteBidDialog from '@/components/DeleteBidDialog'
 import ImageGallery from '@/components/ImageGallery'
 import FavoriteStar from '@/components/FavoriteStar'
+import ExcludeBidControl from '@/components/ExcludeBidControl'
+import AwardBidControl from '@/components/AwardBidControl'
 
 export const dynamic = 'force-dynamic'
 
 export default async function ItemDetailPage(props: PageProps<'/items/[id]'>) {
   const { id } = await props.params
 
-  const item = await prisma.item.findUnique({
-    where: { id },
-    include: {
-      images: { orderBy: { sortOrder: 'asc' } },
-      bids: { where: { deletedAt: null }, orderBy: { createdAt: 'desc' } },
-    },
-  })
+  const [item, admin] = await Promise.all([
+    prisma.item.findUnique({
+      where: { id },
+      include: {
+        images: { orderBy: { sortOrder: 'asc' } },
+        bids: { where: { deletedAt: null }, orderBy: { createdAt: 'desc' } },
+      },
+    }),
+    optionalAdmin(),
+  ])
 
   if (!item) notFound()
+  const isAdmin = !!admin
 
-  const topBidId = item.bids.length
-    ? item.bids.reduce((a, b) => (b.amount > a.amount ? b : a)).id
+  const eligible = item.bids.filter((b) => !b.excludedAt)
+  const topBidId = eligible.length
+    ? eligible.reduce((a, b) => (b.amount > a.amount ? b : a)).id
     : null
 
   return (
@@ -73,7 +81,7 @@ export default async function ItemDetailPage(props: PageProps<'/items/[id]'>) {
               return winner ? (
                 <p>
                   <span className="font-medium">{winner.bidderName}</span>{' '}
-                  <span className="text-zinc-700">— {formatPriceOrFree(winner.amount)}</span>
+                  <span className="text-zinc-700">— {formatPriceOrFree(item.winningPrice)}</span>
                 </p>
               ) : (
                 <p className="text-zinc-500">낙찰자 정보 없음</p>
@@ -91,21 +99,45 @@ export default async function ItemDetailPage(props: PageProps<'/items/[id]'>) {
           <ul className="space-y-2">
             {item.bids.map((bid) => {
               const isTop = bid.id === topBidId
+              const excluded = !!bid.excludedAt
               return (
                 <li
                   key={bid.id}
                   className={`bg-white border rounded p-3 flex items-start justify-between gap-3 ${
-                    isTop ? 'border-yellow-400 bg-yellow-50' : ''
+                    excluded ? 'border-orange-300 bg-orange-50/40 opacity-75' : isTop ? 'border-yellow-400 bg-yellow-50' : ''
                   }`}
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium">{bid.bidderName}</span>
-                      <span className="font-bold">{formatPriceOrFree(bid.amount)}</span>
-                      {isTop && <span className="text-xs bg-yellow-200 text-yellow-900 px-1.5 rounded">최고가</span>}
+                      <span className={`font-bold ${excluded ? 'line-through text-stone-400' : ''}`}>
+                        {formatPriceOrFree(bid.amount)}
+                      </span>
+                      {excluded ? (
+                        <span className="text-xs bg-orange-100 text-orange-800 px-1.5 rounded">경매참여제한</span>
+                      ) : (
+                        isTop && <span className="text-xs bg-yellow-200 text-yellow-900 px-1.5 rounded">최고가</span>
+                      )}
                     </div>
                     {bid.comment && <p className="text-sm text-zinc-600 mt-1 whitespace-pre-wrap">{bid.comment}</p>}
+                    {excluded && bid.excludeReason && (
+                      <p className="text-xs text-orange-700 mt-1">제외 사유: {bid.excludeReason}</p>
+                    )}
                     <p className="text-xs text-zinc-400 mt-1">{formatDateTime(bid.createdAt)}</p>
+
+                    {isAdmin && (
+                      <div className="flex gap-2 mt-2">
+                        <ExcludeBidControl bidId={bid.id} excluded={excluded} />
+                        {!excluded && item.status === 'OPEN' && (
+                          <AwardBidControl
+                            itemId={item.id}
+                            bidId={bid.id}
+                            bidderName={bid.bidderName}
+                            defaultAmount={bid.amount}
+                          />
+                        )}
+                      </div>
+                    )}
                   </div>
                   {item.status === 'OPEN' && <DeleteBidDialog bidId={bid.id} />}
                 </li>

@@ -10,7 +10,7 @@ export default async function CloseItemPage(props: PageProps<'/admin/items/[id]/
 
   const item = await prisma.item.findUnique({
     where: { id },
-    include: { bids: { where: { deletedAt: null }, orderBy: { amount: 'desc' } } },
+    include: { bids: { where: { deletedAt: null, excludedAt: null }, orderBy: { amount: 'desc' } } },
   })
   if (!item) notFound()
   if (item.status === 'CLOSED') redirect(`/items/${item.id}`)

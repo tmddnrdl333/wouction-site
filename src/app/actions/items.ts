@@ -132,17 +132,22 @@ export async function deleteImageAction(imageId: string) {
 export async function closeItemAction(
   itemId: string,
   winnerBidId: string,
+  winningPrice: number,
 ): Promise<{ error?: string } | void> {
   await verifyAdmin()
   const winner = await prisma.bid.findFirst({
-    where: { id: winnerBidId, itemId, deletedAt: null },
+    where: { id: winnerBidId, itemId, deletedAt: null, excludedAt: null },
     select: { id: true },
   })
-  if (!winner) return { error: '유효하지 않은 낙찰 입찰입니다. 새로고침 후 다시 시도해주세요.' }
+  if (!winner) return { error: '유효하지 않은 낙찰 입찰입니다(제외/삭제됨). 새로고침 후 다시 시도해주세요.' }
+
+  if (!Number.isInteger(winningPrice) || winningPrice < 0) {
+    return { error: '낙찰가는 0 이상의 정수여야 합니다' }
+  }
 
   await prisma.item.update({
     where: { id: itemId },
-    data: { status: 'CLOSED', winnerBidId, closedAt: new Date() },
+    data: { status: 'CLOSED', winnerBidId, winningPrice, closedAt: new Date() },
   })
   revalidatePath('/')
   revalidatePath('/closed')
